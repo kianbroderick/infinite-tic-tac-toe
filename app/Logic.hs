@@ -1,7 +1,6 @@
 module Logic where
 
 import Data.Array
-import Data.Maybe (catMaybes)
 import Game
 import Graphics.Gloss.Interface.Pure.Game
 
@@ -33,21 +32,22 @@ playerHist :: Game -> Player -> PlayerHist
 playerHist game PlayerX = playerXHistory game
 playerHist game PlayerO = playerOHistory game
 
-removeLast :: (Int, Int) -> PlayerHist -> PlayerHist
-removeLast cell (x, y, _) = (Just cell, x, y)
+safeHead :: [a] -> Maybe a
+safeHead [] = Nothing
+safeHead (x : _) = Just x
 
 updateBoard :: Game -> (Int, Int) -> Game
 updateBoard game cellCoord
-  | player == PlayerX = game {gameBoard = newBoard, playerXHistory = removeLast cellCoord currentPlayerHist}
-  | player == PlayerO = game {gameBoard = newBoard, playerOHistory = removeLast cellCoord currentPlayerHist}
+  | player == PlayerX = game {gameBoard = newBoard, playerXHistory = newPlayerHist}
+  | player == PlayerO = game {gameBoard = newBoard, playerOHistory = newPlayerHist}
   | otherwise = game
   where
     board = gameBoard game
     player = gamePlayer game
     currentPlayerHist = playerHist game player
-    newPlayerHist = removeLast cellCoord currentPlayerHist
-    toRender = let (a, b, c) = newPlayerHist in catMaybes [a, b, c]
-    toRemove = let (_, _, remove) = currentPlayerHist in remove
+    newPlayerHist = cellCoord : currentPlayerHist
+    toRender = take n newPlayerHist
+    toRemove = safeHead $ drop n newPlayerHist
     newBoard = case toRemove of
       Nothing -> board // [(coord, Full player) | coord <- toRender]
       Just coords -> board // ((coords, Empty) : [(coord, Full player) | coord <- toRender])

@@ -12,7 +12,7 @@ data State = Running | GameOver (Maybe Player) deriving (Eq, Show)
 
 data Cell = Empty | Full Player deriving (Eq, Show)
 
-type PlayerHist = (Maybe (Int, Int), Maybe (Int, Int), Maybe (Int, Int))
+type PlayerHist = [(Int, Int)]
 
 data Game
   = Game
@@ -41,7 +41,7 @@ cellHeight :: Float
 cellHeight = fromIntegral screenHeight / fromIntegral n
 
 initHist :: PlayerHist
-initHist = (Nothing, Nothing, Nothing)
+initHist = []
 
 initialGame :: Game
 initialGame =
